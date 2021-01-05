@@ -1,0 +1,5 @@
+natsort==7.1.0
+audioread==2.1.9
+moviepy==1.0.3
+proglog==0.1.9
+numpy==1.19.3
