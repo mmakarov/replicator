@@ -1,23 +1,67 @@
-# replicator
-Python script to merge a few video files, transparent overlay, text areas with mp3 audio track. Final video will be exact same length as your audio track. Lenght of your video will be calculated automatically.
+# Replicator
 
-[![Resulting video](http://img.youtube.com/vi/4Uu1hS3-eQM/0.jpg)](http://www.youtube.com/watch?v=4Uu1hS3-eQM "Replicator script example video")
+Replicator creates a YouTube-ready video from:
 
-I've made this script in a try to merge any video sequence files with PNG transparent overlay, adding text areas on video, with mp3 audio track. The resulting video file is ready to upload on Youtube or any other video hosting service.
+- one or more source videos;
+- one audio track;
+- a transparent PNG overlay;
+- four short text fields.
 
-You can change it to your taste.
+The final `youtube_ready.mp4` is automatically looped to match the audio length.
 
-How to use it: 
+## Windows: easiest way
 
-Open the terminal and enter: git clone https://github.com/mmakarov/replicator.git
+Download the latest release archive from GitHub Releases:
 
-Put your video files to the 'video' directory as 'source1.mp4', 'source2.mp4', etc
+`Replicator-Windows.zip`
 
-Put your PNG transparent image to the project directory as 'overlay.png'
+Then:
 
-Put your MP3 file to the 'audio' directory as 'voice.mp3'
-in terminal run: python3 source-to-fin.py or python source-to-fin-win.py for Windows
+1. Unzip it anywhere.
+2. Double-click `run-windows.bat`.
+3. Choose video files, one audio file, and optionally another PNG overlay.
+4. Click `Старт`.
+5. The result will appear next to the app as `youtube_ready.mp4`.
 
-Finally, you've got the "youtube_ready.mp4" file
+Nothing else needs to be installed. The release archive already includes Python, Qt, ffmpeg, fonts, and sample files.
 
-Warning: Russian comments in sources!
+## Default files
+
+The Windows package includes sample inputs:
+
+- `video/source1.mp4`
+- `video/source2.mp4`
+- `video/source4.mp4`
+- `audio/voice.mp3`
+- `overlay.png`
+
+The overlay from the package is selected by default on startup.
+
+## Current GUI behavior
+
+- UI language is Russian.
+- Multiple video files can be selected from anywhere on disk.
+- Audio and overlay are selected by path; the app does not delete or overwrite selected source files.
+- Before rendering, the app checks free disk space and shows an error if there is not enough room.
+- ffmpeg progress is streamed into the log so long renders do not look frozen.
+
+## Developer run
+
+On macOS/Linux with ffmpeg installed:
+
+```bash
+python3 replicator.py \
+  --heading Test \
+  --name Name \
+  --extra Country \
+  --date Date \
+  --audio audio/voice.mp3 \
+  --overlay overlay.png \
+  --video video/source1.mp4 \
+  --video video/source2.mp4
+```
+
+The legacy scripts are kept for reference:
+
+- `source-to-fin.py`
+- `source-to-fin-win.py`

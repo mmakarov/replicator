@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+youtube_ready.mp4
+medium.mp4
+silent_fin.mp4
+
+# Build artifacts are published as GitHub Release assets.
+dist/
+
+# Local test/runtime caches.
+.wine-test/
+.gocache/
+.gomodcache/
+.gopath/
