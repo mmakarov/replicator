@@ -51,6 +51,7 @@ jobs:
           }
 
       - name: Start launcher through batch in smoke mode
+        timeout-minutes: 3
         shell: cmd
         working-directory: release\Replicator-Windows
         env:

@@ -17,10 +17,13 @@ def smoke_test():
 
     app = QApplication.instance() or QApplication(["replicator-smoke"])
     window = gui_qt.ReplicatorWindow()
-    window.show()
     app.processEvents()
+    if not window.windowTitle():
+        raise RuntimeError("Replicator window was not initialized")
     print("Replicator GUI smoke OK")
     window.close()
+    window.deleteLater()
+    app.processEvents()
     app.quit()
 
 
