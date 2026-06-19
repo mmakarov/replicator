@@ -57,8 +57,9 @@ jobs:
 
           $pthPath = "$packageRoot\python\python312._pth"
           $pth = Get-Content $pthPath | Where-Object {
-            $_ -ne "#import site" -and $_ -ne "import site" -and $_ -ne "Lib\site-packages"
+            $_ -ne "#import site" -and $_ -ne "import site" -and $_ -ne ".." -and $_ -ne "Lib\site-packages"
           }
+          $pth += ".."
           $pth += "Lib\site-packages"
           $pth += "import site"
           [System.IO.File]::WriteAllLines((Resolve-Path $pthPath), $pth, [System.Text.UTF8Encoding]::new($false))
