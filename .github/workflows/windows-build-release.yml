@@ -1,0 +1,180 @@
+name: Build Windows release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag, for example v6"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build, smoke test, and publish
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup build Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate version input
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          if ("${{ inputs.version }}" -notmatch '^v[0-9][0-9A-Za-z._-]*$') {
+            throw "Version must look like v6, v6.1, or v6-test"
+          }
+
+      - name: Build portable package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $pythonVersion = "3.12.10"
+          $pysideVersion = "6.8.3"
+          $packageRoot = "dist\Replicator-Windows"
+
+          if (Test-Path "dist") {
+            Remove-Item -Recurse -Force "dist"
+          }
+          New-Item -ItemType Directory -Force -Path $packageRoot, "$packageRoot\python", "$packageRoot\bin" | Out-Null
+
+          Copy-Item -Force replicator.py, gui_qt.py, launcher.py, run-windows.bat, overlay.png -Destination $packageRoot
+          Copy-Item -Force WINDOWS_README.txt "$packageRoot\README.txt"
+          Copy-Item -Recurse -Force video, audio, fonts -Destination $packageRoot
+
+          Invoke-WebRequest `
+            -Uri "https://www.python.org/ftp/python/$pythonVersion/python-$pythonVersion-embed-amd64.zip" `
+            -OutFile "python-embed.zip"
+          Expand-Archive -Path "python-embed.zip" -DestinationPath "$packageRoot\python" -Force
+
+          $pthPath = "$packageRoot\python\python312._pth"
+          $pth = Get-Content $pthPath | Where-Object {
+            $_ -ne "#import site" -and $_ -ne "import site" -and $_ -ne "Lib\site-packages"
+          }
+          $pth += "Lib\site-packages"
+          $pth += "import site"
+          [System.IO.File]::WriteAllLines((Resolve-Path $pthPath), $pth, [System.Text.UTF8Encoding]::new($false))
+
+          python -m pip install --upgrade pip
+          python -m pip install `
+            --target "$packageRoot\python\Lib\site-packages" `
+            "PySide6-Essentials==$pysideVersion" `
+            "shiboken6==$pysideVersion"
+
+          Invoke-WebRequest `
+            -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" `
+            -OutFile "ffmpeg.zip"
+          Expand-Archive -Path "ffmpeg.zip" -DestinationPath "ffmpeg-build" -Force
+          $ffmpegRoot = Get-ChildItem "ffmpeg-build" -Directory | Select-Object -First 1
+          Copy-Item -Force "$($ffmpegRoot.FullName)\bin\ffmpeg.exe" "$packageRoot\bin\ffmpeg.exe"
+          Copy-Item -Force "$($ffmpegRoot.FullName)\bin\ffprobe.exe" "$packageRoot\bin\ffprobe.exe"
+
+          $batPath = "$packageRoot\run-windows.bat"
+          $bat = Get-Content -Raw $batPath
+          $bat = $bat -replace "`r?`n", "`r`n"
+          [System.IO.File]::WriteAllText((Resolve-Path $batPath), $bat, [System.Text.UTF8Encoding]::new($false))
+
+          Compress-Archive -Path $packageRoot -DestinationPath "dist\Replicator-Windows.zip" -Force
+
+      - name: Verify package layout
+        shell: pwsh
+        working-directory: dist\Replicator-Windows
+        run: |
+          $ErrorActionPreference = "Stop"
+          $required = @(
+            "run-windows.bat",
+            "launcher.py",
+            "gui_qt.py",
+            "replicator.py",
+            "python\python.exe",
+            "bin\ffmpeg.exe",
+            "bin\ffprobe.exe",
+            "overlay.png",
+            "audio\voice.mp3",
+            "video\source1.mp4",
+            "video\source2.mp4",
+            "fonts\NotoSans-Regular.ttf",
+            "fonts\NotoSans-Bold.ttf",
+            "README.txt"
+          )
+          foreach ($path in $required) {
+            if (!(Test-Path $path)) {
+              throw "Missing required file: $path"
+            }
+          }
+          $bat = [System.IO.File]::ReadAllText((Resolve-Path "run-windows.bat"))
+          if (!$bat.Contains("`r`n")) {
+            throw "run-windows.bat must use CRLF line endings"
+          }
+
+      - name: Start launcher through batch in smoke mode
+        timeout-minutes: 3
+        shell: cmd
+        working-directory: dist\Replicator-Windows
+        env:
+          REPLICATOR_SMOKE: "1"
+          QT_OPENGL: software
+          PYTHONUTF8: "1"
+        run: run-windows.bat
+
+      - name: Render sample video
+        shell: cmd
+        working-directory: dist\Replicator-Windows
+        env:
+          QT_OPENGL: software
+          PYTHONUTF8: "1"
+        run: >
+          python\python.exe replicator.py
+          --no-pause
+          --heading "#TEST"
+          --name "Elena"
+          --extra "Windows"
+          --date "2026"
+          --audio audio\voice.mp3
+          --overlay overlay.png
+          --video video\source1.mp4
+          --video video\source2.mp4
+
+      - name: Verify rendered output
+        shell: pwsh
+        working-directory: dist\Replicator-Windows
+        run: |
+          $ErrorActionPreference = "Stop"
+          if (!(Test-Path "youtube_ready.mp4")) {
+            throw "youtube_ready.mp4 was not created"
+          }
+          $size = (Get-Item "youtube_ready.mp4").Length
+          if ($size -lt 1048576) {
+            throw "youtube_ready.mp4 is unexpectedly small: $size bytes"
+          }
+          bin\ffprobe.exe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 youtube_ready.mp4
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          gh release create "${{ inputs.version }}" "dist\Replicator-Windows.zip" `
+            --target "${{ github.sha }}" `
+            --title "Replicator Windows ${{ inputs.version }}" `
+            --notes "Self-contained Windows package. Includes embedded Python, Qt, ffmpeg, fonts, overlay, sample video/audio, startup.log and render.log diagnostics."
+
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-release-smoke-output
+          path: |
+            dist/Replicator-Windows/startup.log
+            dist/Replicator-Windows/render.log
+            dist/Replicator-Windows/youtube_ready.mp4
+          if-no-files-found: ignore

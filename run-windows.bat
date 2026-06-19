@@ -21,7 +21,9 @@ exit /b 0
 echo.
 echo Не найден файл python\python.exe.
 echo Возможно, архив распакован не полностью.
+if "%REPLICATOR_SMOKE%"=="1" goto no_python_exit
 pause
+:no_python_exit
 popd
 exit /b 1
 
@@ -29,7 +31,9 @@ exit /b 1
 echo.
 echo Не найден файл launcher.py.
 echo Возможно, архив распакован не полностью.
+if "%REPLICATOR_SMOKE%"=="1" goto no_launcher_exit
 pause
+:no_launcher_exit
 popd
 exit /b 1
 
@@ -37,6 +41,8 @@ exit /b 1
 echo.
 echo Приложение завершилось с ошибкой.
 echo Если рядом появился startup.log или render.log, отправьте этот файл разработчику.
+if "%REPLICATOR_SMOKE%"=="1" goto app_error_exit
 pause
+:app_error_exit
 popd
 exit /b %APP_ERROR%
