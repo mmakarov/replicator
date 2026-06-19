@@ -48,7 +48,16 @@ The overlay from the package is selected by default on startup.
 
 ## Windows release smoke test
 
-The GitHub Actions workflow `Windows release smoke` tests the portable Windows zip on a real Windows runner.
+The GitHub Actions workflow `Windows build and smoke` builds and tests the portable Windows zip on a real Windows runner. It uploads the ready `Replicator-Windows.zip` as an artifact.
+
+1. Open GitHub Actions.
+2. Choose `Windows build and smoke`.
+3. Click `Run workflow`.
+4. Download the `Replicator-Windows` artifact when the run passes.
+
+The workflow downloads embedded Python, PySide6 and ffmpeg, builds the archive, starts `run-windows.bat` in GUI smoke mode, renders a sample `youtube_ready.mp4`, checks the result with ffprobe, and uploads logs/output as artifacts.
+
+The GitHub Actions workflow `Windows release smoke` tests an already published portable Windows zip by URL.
 
 1. Open GitHub Actions.
 2. Choose `Windows release smoke`.
