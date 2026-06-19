@@ -3,9 +3,10 @@ import os
 import shutil
 import subprocess
 import sys
+import traceback
 from pathlib import Path
 
-from PySide6.QtCore import QProcess, Qt
+from PySide6.QtCore import QProcess, QProcessEnvironment, Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QApplication,
@@ -26,12 +27,15 @@ from PySide6.QtWidgets import (
 
 ROOT = Path(__file__).resolve().parent
 MAX_TEXT_LENGTH = 20
+STARTUP_LOG = ROOT / "startup.log"
+RENDER_LOG = ROOT / "render.log"
 
 
 class ReplicatorWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.process = None
+        self.render_log = None
         self.video_files = sorted((ROOT / "video").glob("source*.mp4"))
         self.audio_file = ROOT / "audio" / "voice.mp3"
         self.overlay_file = ROOT / "overlay.png"
@@ -238,6 +242,9 @@ class ReplicatorWindow(QWidget):
         return values
 
     def append_log(self, text):
+        if self.render_log:
+            self.render_log.write(text)
+            self.render_log.flush()
         self.log.moveCursor(self.log.textCursor().MoveOperation.End)
         self.log.insertPlainText(text)
         self.log.moveCursor(self.log.textCursor().MoveOperation.End)
@@ -283,6 +290,7 @@ class ReplicatorWindow(QWidget):
             return
 
         self.log.clear()
+        self.render_log = RENDER_LOG.open("w", encoding="utf-8", errors="replace")
         self.append_log("Запуск сборки...\n")
         self.start_button.setEnabled(False)
         self.open_button.setEnabled(False)
@@ -310,13 +318,15 @@ class ReplicatorWindow(QWidget):
         for video in self.video_files:
             args.extend(["--video", str(video)])
         self.process = QProcess(self)
-        env = self.process.processEnvironment()
+        env = QProcessEnvironment.systemEnvironment()
         env.insert("PYTHONUTF8", "1")
+        env.insert("QT_OPENGL", "software")
         self.process.setProcessEnvironment(env)
         self.process.setWorkingDirectory(str(ROOT))
         self.process.readyReadStandardOutput.connect(self.read_process)
         self.process.readyReadStandardError.connect(self.read_process)
         self.process.finished.connect(self.finish_build)
+        self.process.errorOccurred.connect(self.process_error)
         self.process.start(str(python_exe), args)
 
     def read_process(self):
@@ -327,7 +337,13 @@ class ReplicatorWindow(QWidget):
         if data:
             self.append_log(data)
 
+    def close_render_log(self):
+        if self.render_log:
+            self.render_log.close()
+            self.render_log = None
+
     def finish_build(self, code, _status):
+        self.close_render_log()
         self.start_button.setEnabled(True)
         self.refresh_status()
         if code == 0 and (ROOT / "youtube_ready.mp4").exists():
@@ -335,6 +351,14 @@ class ReplicatorWindow(QWidget):
         else:
             self.append_log(f"\nОшибка сборки. Код: {code}\n")
             QMessageBox.critical(self, "Replicator", "Сборка завершилась с ошибкой. Подробности в логе.")
+
+    def process_error(self, error):
+        self.close_render_log()
+        self.start_button.setEnabled(True)
+        self.refresh_status()
+        message = f"Не удалось запустить процесс сборки: {error}"
+        self.append_log("\n" + message + "\n")
+        QMessageBox.critical(self, "Replicator", message)
 
     def open_result(self):
         result = ROOT / "youtube_ready.mp4"
@@ -357,11 +381,15 @@ class ReplicatorWindow(QWidget):
 
 def main():
     os.chdir(ROOT)
-    app = QApplication(sys.argv)
-    app.setFont(QFont("Segoe UI", 10))
-    window = ReplicatorWindow()
-    window.show()
-    sys.exit(app.exec())
+    try:
+        app = QApplication(sys.argv)
+        app.setFont(QFont("Segoe UI", 10))
+        window = ReplicatorWindow()
+        window.show()
+        sys.exit(app.exec())
+    except Exception:
+        STARTUP_LOG.write_text(traceback.format_exc(), encoding="utf-8", errors="replace")
+        raise
 
 
 if __name__ == "__main__":

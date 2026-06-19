@@ -1,0 +1,103 @@
+name: Windows release smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      zip_url:
+        description: "URL to Replicator-Windows.zip"
+        required: true
+        default: "https://github.com/mmakarov/replicator/releases/latest/download/Replicator-Windows.zip"
+
+jobs:
+  smoke:
+    name: Test portable Windows zip
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Download release archive
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          Invoke-WebRequest -Uri "${{ inputs.zip_url }}" -OutFile "Replicator-Windows.zip"
+          Expand-Archive -Path "Replicator-Windows.zip" -DestinationPath "release" -Force
+
+      - name: Verify package layout
+        shell: pwsh
+        working-directory: release\Replicator-Windows
+        run: |
+          $ErrorActionPreference = "Stop"
+          $required = @(
+            "run-windows.bat",
+            "launcher.py",
+            "gui_qt.py",
+            "replicator.py",
+            "python\python.exe",
+            "bin\ffmpeg.exe",
+            "bin\ffprobe.exe",
+            "overlay.png",
+            "audio\voice.mp3",
+            "video\source1.mp4",
+            "video\source2.mp4"
+          )
+          foreach ($path in $required) {
+            if (!(Test-Path $path)) {
+              throw "Missing required file: $path"
+            }
+          }
+          $bat = [System.IO.File]::ReadAllText((Resolve-Path "run-windows.bat"))
+          if (!$bat.Contains("`r`n")) {
+            throw "run-windows.bat must use CRLF line endings"
+          }
+
+      - name: Start launcher through batch in smoke mode
+        shell: cmd
+        working-directory: release\Replicator-Windows
+        env:
+          REPLICATOR_SMOKE: "1"
+          QT_OPENGL: software
+          PYTHONUTF8: "1"
+        run: run-windows.bat
+
+      - name: Render sample video
+        shell: cmd
+        working-directory: release\Replicator-Windows
+        env:
+          QT_OPENGL: software
+          PYTHONUTF8: "1"
+        run: >
+          python\python.exe replicator.py
+          --no-pause
+          --heading "#TEST"
+          --name "Elena"
+          --extra "Windows"
+          --date "2026"
+          --audio audio\voice.mp3
+          --overlay overlay.png
+          --video video\source1.mp4
+          --video video\source2.mp4
+
+      - name: Verify rendered output
+        shell: pwsh
+        working-directory: release\Replicator-Windows
+        run: |
+          $ErrorActionPreference = "Stop"
+          if (!(Test-Path "youtube_ready.mp4")) {
+            throw "youtube_ready.mp4 was not created"
+          }
+          $size = (Get-Item "youtube_ready.mp4").Length
+          if ($size -lt 1048576) {
+            throw "youtube_ready.mp4 is unexpectedly small: $size bytes"
+          }
+          bin\ffprobe.exe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 youtube_ready.mp4
+
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release-smoke-output
+          path: |
+            release/Replicator-Windows/startup.log
+            release/Replicator-Windows/render.log
+            release/Replicator-Windows/youtube_ready.mp4
+          if-no-files-found: ignore

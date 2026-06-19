@@ -44,6 +44,18 @@ The overlay from the package is selected by default on startup.
 - Audio and overlay are selected by path; the app does not delete or overwrite selected source files.
 - Before rendering, the app checks free disk space and shows an error if there is not enough room.
 - ffmpeg progress is streamed into the log so long renders do not look frozen.
+- Startup/render failures are written to `startup.log` and `render.log` next to `run-windows.bat`.
+
+## Windows release smoke test
+
+The GitHub Actions workflow `Windows release smoke` tests the portable Windows zip on a real Windows runner.
+
+1. Open GitHub Actions.
+2. Choose `Windows release smoke`.
+3. Click `Run workflow`.
+4. Keep the default URL for the latest release, or paste a specific `Replicator-Windows.zip` URL.
+
+The workflow unpacks the archive, starts `run-windows.bat` in GUI smoke mode, renders a sample `youtube_ready.mp4`, checks the result with ffprobe, and uploads logs/output as artifacts.
 
 ## Developer run
 
