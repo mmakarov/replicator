@@ -28,6 +28,9 @@ def smoke_test():
 
 
 def show_error(message):
+    if os.environ.get("REPLICATOR_SMOKE") == "1" or "--smoke" in sys.argv:
+        print(message)
+        return
     try:
         ctypes.windll.user32.MessageBoxW(None, message, "Replicator", 0x10)
     except Exception:

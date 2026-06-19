@@ -21,7 +21,9 @@ exit /b 0
 echo.
 echo   Ñ python\python.exe.
 echo , ÄÖ Ä  Çåé.
+if "%REPLICATOR_SMOKE%"=="1" goto no_python_exit
 pause
+:no_python_exit
 popd
 exit /b 1
 
@@ -29,7 +31,9 @@ exit /b 1
 echo.
 echo   Ñ launcher.py.
 echo , ÄÖ Ä  Çåé.
+if "%REPLICATOR_SMOKE%"=="1" goto no_launcher_exit
 pause
+:no_launcher_exit
 popd
 exit /b 1
 
@@ -37,6 +41,8 @@ exit /b 1
 echo.
 echo Ä Äàå  à.
 echo  Ä  startup.log  render.log, ÇÄåÇ çÇÇ Ñ ÄÄÇáÉ.
+if "%REPLICATOR_SMOKE%"=="1" goto app_error_exit
 pause
+:app_error_exit
 popd
 exit /b %APP_ERROR%

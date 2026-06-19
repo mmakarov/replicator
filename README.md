@@ -46,16 +46,18 @@ The overlay from the package is selected by default on startup.
 - ffmpeg progress is streamed into the log so long renders do not look frozen.
 - Startup/render failures are written to `startup.log` and `render.log` next to `run-windows.bat`.
 
-## Windows release smoke test
+## Windows release workflow
 
-The GitHub Actions workflow `Windows release smoke` tests the portable Windows zip on a real Windows runner.
+The GitHub Actions workflow `Build Windows release` builds, smoke-tests, and publishes a self-contained Windows release.
 
 1. Open GitHub Actions.
-2. Choose `Windows release smoke`.
+2. Choose `Build Windows release`.
 3. Click `Run workflow`.
-4. Keep the default URL for the latest release, or paste a specific `Replicator-Windows.zip` URL.
+4. Enter a new version tag, for example `v6`.
 
-The workflow unpacks the archive, starts `run-windows.bat` in GUI smoke mode, renders a sample `youtube_ready.mp4`, checks the result with ffprobe, and uploads logs/output as artifacts.
+The workflow runs on `windows-latest`, downloads embedded Python, PySide6 Essentials, shiboken6 and ffmpeg during the build, creates `dist/Replicator-Windows.zip`, runs the Windows smoke tests against the built package, and only then creates the GitHub Release.
+
+The separate workflow `Windows release smoke` can still test an already published `Replicator-Windows.zip` by URL.
 
 ## Developer run
 
