@@ -15,4 +15,11 @@ youtube_ready.mp4
 
  ƒ , ‚€‚  : ‚ ƒ‚ ‚ €€ ffmpeg.
 
+ €€ ‹ ˆƒ, €ˆ‚ €€‚‡ƒ „‹:
+
+startup.log
+render.log
+
+ ‚ €  run-windows.bat,  ˆ ƒ‡Œ € ƒ  €.
+
 ‡ ƒ‚‚Œ  ƒ.  €… ƒ ‹ €, Python, Qt, ffmpeg  ˆ€„‚‹.
