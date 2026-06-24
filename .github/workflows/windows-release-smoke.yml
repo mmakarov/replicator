@@ -69,10 +69,10 @@ jobs:
         run: >
           python\python.exe replicator.py
           --no-pause
-          --heading "#TEST"
+          --heading "#"
           --name ""
-          --extra "Windows"
-          --date "2026"
+          --extra ""
+          --date "19.06.2026 ."
           --audio audio\voice.mp3
           --overlay overlay.png
           --video video\source1.mp4
