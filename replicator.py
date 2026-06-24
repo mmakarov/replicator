@@ -24,6 +24,12 @@ SILENT_FILE = ROOT / "silent_fin.mp4"
 FINAL_FILE = ROOT / "youtube_ready.mp4"
 MAX_TEXT_LENGTH = 20
 PAUSE_ON_ERROR = True
+TEXT_FILE_NAMES = {
+    "heading": "drawtext_heading.txt",
+    "name": "drawtext_name.txt",
+    "extra": "drawtext_extra.txt",
+    "date": "drawtext_date.txt",
+}
 
 
 def natural_key(path):
@@ -155,10 +161,15 @@ def probe_duration(path):
         fail(f"ffprobe вернул непонятную длительность для файла {path.name}")
 
 
+def escape_filter_value(value):
+    return str(value).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
+
+
 def font_path(bold=False):
-    bundled = ROOT / "fonts" / ("NotoSans-Bold.ttf" if bold else "NotoSans-Regular.ttf")
+    font_name = "NotoSans-Bold.ttf" if bold else "NotoSans-Regular.ttf"
+    bundled = ROOT / "fonts" / font_name
     if bundled.exists():
-        return str(bundled).replace("\\", "/").replace(":", "\\:")
+        return f"fonts/{font_name}"
     if os.name == "nt":
         return "C\\:/Windows/Fonts/arialbd.ttf" if bold else "C\\:/Windows/Fonts/arial.ttf"
     candidates = [
@@ -172,18 +183,22 @@ def font_path(bold=False):
     return "Arial"
 
 
-def drawtext(text, size, y, bold=False):
-    font = font_path(bold)
-    escaped = (
-        text.replace("\\", "\\\\")
-        .replace(":", "\\:")
-        .replace("'", "\\'")
-        .replace("%", "\\%")
-    )
+def write_text_files(texts):
+    text_files = {}
+    for key, file_name in TEXT_FILE_NAMES.items():
+        path = ROOT / file_name
+        path.write_text(texts[key], encoding="utf-8", errors="replace")
+        text_files[key] = file_name
+    return text_files
+
+
+def drawtext(text_file, size, y, bold=False):
+    font = escape_filter_value(font_path(bold))
+    text_file = escape_filter_value(text_file)
     return (
         "drawtext="
         f"fontfile='{font}':"
-        f"text='{escaped}':"
+        f"textfile='{text_file}':"
         f"fontsize={size}:"
         "fontcolor=white:"
         "x=(w-text_w)/2:"
@@ -224,6 +239,7 @@ def check_inputs():
 
 def create_medium(sources, texts):
     ffmpeg = ffmpeg_path()
+    text_files = write_text_files(texts)
     command = [ffmpeg, "-hide_banner", "-stats", "-y"]
     for source in sources:
         command.extend(["-i", str(source)])
@@ -247,10 +263,10 @@ def create_medium(sources, texts):
         "[with_overlay]"
         + ",".join(
             [
-                drawtext(texts["heading"], 68, 150),
-                drawtext(texts["name"], 42, 250, bold=True),
-                drawtext(texts["extra"], 42, 300),
-                drawtext(texts["date"], 36, 400),
+                drawtext(text_files["heading"], 68, 150),
+                drawtext(text_files["name"], 42, 250, bold=True),
+                drawtext(text_files["extra"], 42, 300),
+                drawtext(text_files["date"], 36, 400),
             ]
         )
         + "[outv]"
@@ -335,7 +351,8 @@ def create_final():
 
 
 def cleanup():
-    for path in (SILENT_FILE, MEDIUM_FILE):
+    temp_text_files = [ROOT / file_name for file_name in TEXT_FILE_NAMES.values()]
+    for path in (SILENT_FILE, MEDIUM_FILE, *temp_text_files):
         try:
             path.unlink()
         except FileNotFoundError:
