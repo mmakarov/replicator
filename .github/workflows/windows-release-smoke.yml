@@ -70,8 +70,8 @@ jobs:
           python\python.exe replicator.py
           --no-pause
           --heading "#TEST"
-          --name ""
-          --extra ""
+          --name "Jane Doe"
+          --extra "Sample City"
           --date "2026-06-19"
           --audio audio\voice.mp3
           --overlay overlay.png

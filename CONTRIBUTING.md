@@ -46,7 +46,7 @@ CLI:
 python3 replicator.py \
   --heading "#EVENT" \
   --name "Jane Doe" \
-  --extra "United Kingdom" \
+  --extra "Sample City" \
   --date "2026-06-19" \
   --audio audio/voice.mp3 \
   --overlay overlay.png \

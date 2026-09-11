@@ -14,7 +14,7 @@ Notes for later iterations. Do not change the working release path just for clea
 - Move or remove legacy MoviePy scripts: `source-to-fin.py` and `source-to-fin-win.py`.
 - Update or remove old `requirements.txt`; the current Windows release path does not use MoviePy/numpy/audioread.
 - Clarify old `README.txt` versus current `README.md` / `WINDOWS_README.txt`.
-- Add `pyproject.toml` with project-specific `ruff` rules so linting ignores intentional  UI strings and legacy files if they stay.
+- Add `pyproject.toml` with project-specific `ruff` rules so linting ignores legacy files if they stay.
 
 ## Converter robustness
 

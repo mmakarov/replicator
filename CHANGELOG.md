@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   English.
 - Replaced the sample `overlay.png` with a neutral placeholder.
 
+### Removed
+
+- Obsolete top-level `README.txt` (superseded by `README.md`).
+- Country-specific references from the documentation and smoke-test examples.
+
 ### Documentation
 
 - Clarified the legacy status of `source-to-fin.py`, `source-to-fin-win.py`, and
