@@ -15,17 +15,17 @@ final file has exactly the same length as the audio.
 
 ## Features
 
-- **GUI and CLI** â€ a PySide6 desktop window for everyday use and a scriptable
+- **GUI and CLI**: a PySide6 desktop window for everyday use and a scriptable
   `replicator.py` command.
-- **Automatic looping** â€ the concatenated video repeats until it covers the
+- **Automatic looping**: the concatenated video repeats until it covers the
   full audio track, then the audio is muxed in.
-- **Transparent overlay** â€ any 1280x720 PNG overlay is composited over every
+- **Transparent overlay**: any 1280x720 PNG overlay is composited over every
   frame.
-- **Four text fields** â€ heading, name, extra line, and date, rendered with
+- **Four text fields**: heading, name, extra line, and date, rendered with
   bundled Noto Sans fonts (including Cyrillic).
-- **Portable Windows build** â€ a single `Replicator-Windows.zip` with embedded
+- **Portable Windows build**: a single `Replicator-Windows.zip` with embedded
   Python, Qt, ffmpeg, fonts, and sample media. No installation required.
-- **Diagnostics** â€ startup and render errors are written to `startup.log` and
+- **Diagnostics**: startup and render errors are written to `startup.log` and
   `render.log` next to the launcher.
 
 ## Quick start (Windows)
@@ -53,11 +53,11 @@ The Windows package ships with sample inputs that are selected on startup:
 ## How it works
 
 ```text
-source videos â€â€â scale + crop to 1280x720 â€â€â concat â€â€â
-                                                        ââ€â€â overlay + drawtext â€â€â medium.mp4
-overlay.png â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â€â
-        â‚
-        ââ€â€â loop to match audio length â€â€â mux audio â€â€â youtube_ready.mp4
+source videos --> scale + crop to 1280x720 --> concat --+
+                                                        +--> overlay + drawtext --> medium.mp4
+overlay.png --------------------------------------------+
+
+medium.mp4 --> loop to match audio length --> mux audio --> youtube_ready.mp4
 ```
 
 1. Each source is scaled and cropped to 1280x720, then all clips are
@@ -126,7 +126,7 @@ smoke tests). Without the text arguments, the CLI prompts for each field.
 The GitHub Actions workflow **Build Windows release** builds, smoke-tests, and
 publishes the portable package.
 
-1. Open **Actions** â† **Build Windows release**.
+1. Open **Actions**, then **Build Windows release**.
 2. Click **Run workflow**.
 3. Enter a new tag, for example `v8`.
 
@@ -138,14 +138,14 @@ archive by URL.
 
 ## Troubleshooting
 
-- **Nothing happens / app closes** â€ check `startup.log` next to
+- **Nothing happens / app closes**: check `startup.log` next to
   `run-windows.bat`.
-- **Render fails** â€ check `render.log`; it contains the full `ffmpeg` output.
-- **`ffmpeg` not found** â€ install ffmpeg and make sure it is on `PATH`, or
+- **Render fails**: check `render.log`; it contains the full `ffmpeg` output.
+- **`ffmpeg` not found**: install ffmpeg and make sure it is on `PATH`, or
   place `ffmpeg`/`ffprobe` in a local `bin/` folder.
-- **Not enough disk space** â€ the app needs room for the intermediate video, the
+- **Not enough disk space**: the app needs room for the intermediate video, the
   looped copy, and the final file; free several gigabytes before rendering.
-- **Text is missing or garbled** â€ keep the bundled `fonts/` folder next to the
+- **Text is missing or garbled**: keep the bundled `fonts/` folder next to the
   scripts; it provides Cyrillic coverage.
 
 ## Legacy scripts
