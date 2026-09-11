@@ -63,7 +63,7 @@ def ffmpeg_path():
     found = shutil.which("ffmpeg")
     if found:
         return found
-    fail("  ffmpeg.  € Windows-€   ‚Œ   bin.")
+    fail("ffmpeg not found. In the portable Windows build it should be in the bin folder.")
 
 
 def ffprobe_path():
@@ -76,24 +76,24 @@ def ffprobe_path():
     found = shutil.which("ffprobe")
     if found:
         return found
-    fail("  ffprobe.  € Windows-€   ‚Œ   bin.")
+    fail("ffprobe not found. In the portable Windows build it should be in the bin folder.")
 
 
 def fail(message):
     print("")
-    print(": " + message)
+    print("ERROR: " + message)
     print("")
     if PAUSE_ON_ERROR:
-        input("‚ Enter, ‡‚‹ €‹‚Œ ...")
+        input("Press Enter to close this window...")
     sys.exit(1)
 
 
 def prompt_text(label, default):
-    value = input(f"{label} ({MAX_TEXT_LENGTH} ., Enter = {default}): ").strip()
+    value = input(f"{label} ({MAX_TEXT_LENGTH} chars, Enter = {default}): ").strip()
     if not value:
         return default
     if len(value) > MAX_TEXT_LENGTH:
-        fail(f"ˆ ‹ ‚‚: {label}")
+        fail(f"Text is too long: {label}")
     return value
 
 
@@ -102,7 +102,7 @@ def validate_text(label, value, default):
     if not value:
         return default
     if len(value) > MAX_TEXT_LENGTH:
-        fail(f"ˆ ‹ ‚‚: {label}")
+        fail(f"Text is too long: {label}")
     return value
 
 
@@ -134,7 +134,7 @@ def run(command):
         print(pending.strip(), flush=True)
     result = process.wait()
     if result != 0:
-        fail("ffmpeg €ˆ  ˆ. €€Œ‚ …‹ „‹  €ƒ‚ ‰ €.")
+        fail("ffmpeg exited with an error. Check the input files and try again.")
 
 
 def probe_duration(path):
@@ -154,11 +154,11 @@ def probe_duration(path):
         text=True,
     )
     if result.returncode != 0:
-        fail(f" ƒŒ €‡‚‚Œ ‚Œ‚Œ „ {path.name}")
+        fail(f"Could not read the duration of {path.name}")
     try:
         return float(result.stdout.strip())
     except ValueError:
-        fail(f"ffprobe €ƒ ‚ƒŽ ‚Œ‚Œ  „ {path.name}")
+        fail(f"ffprobe returned an unreadable duration for {path.name}")
 
 
 def escape_filter_value(value):
@@ -211,7 +211,7 @@ def collect_sources(selected_sources=None):
         sources = [Path(source) for source in selected_sources]
     else:
         if not VIDEO_DIR.exists():
-            fail("‚  video.")
+            fail("The video folder is missing.")
         sources = sorted(
             [
                 path
@@ -223,18 +223,18 @@ def collect_sources(selected_sources=None):
             key=natural_key,
         )
     if not sources:
-        fail("  video ‚ „ source1.mp4, source2.mp4  ‚ .")
+        fail("No source1.mp4, source2.mp4, ... files found in the video folder.")
     missing = [str(source) for source in sources if not source.exists()]
     if missing:
-        fail(" ‹ „‹: " + ", ".join(missing))
+        fail("Video files not found: " + ", ".join(missing))
     return sources
 
 
 def check_inputs():
     if not AUDIO_FILE.exists():
-        fail("‚ ƒ„: " + str(AUDIO_FILE))
+        fail("No audio file: " + str(AUDIO_FILE))
     if not OVERLAY_FILE.exists():
-        fail("‚ PNG-€: " + str(OVERLAY_FILE))
+        fail("No PNG overlay: " + str(OVERLAY_FILE))
 
 
 def create_medium(sources, texts):
@@ -300,15 +300,15 @@ def create_final():
     audio_length = math.ceil(audio_duration)
     video_length = math.ceil(video_duration)
     if video_length <= 0:
-        fail("€ƒ‚‡  ƒ‡Œ ƒ ‹.")
+        fail("The intermediate video has zero length.")
 
     repeats = max(1, math.ceil(audio_duration / video_duration))
     loop = repeats - 1
 
-    print(f"‚Œ‚Œ ƒ: {audio_length} ƒ")
-    print(f"‚Œ‚Œ : {video_length} ƒ")
-    print(f"‚€ : {repeats}")
-    print("…€ Œˆ   ƒ...")
+    print(f"Audio duration: {audio_length} seconds")
+    print(f"Video duration: {video_length} seconds")
+    print(f"Video repeats: {repeats}")
+    print("Saving the looped video without sound...")
     run(
         [
             ffmpeg,
@@ -325,7 +325,7 @@ def create_final():
         ]
     )
 
-    print(" ƒƒŽ €ƒ...")
+    print("Adding the audio track...")
     run(
         [
             ffmpeg,
@@ -381,42 +381,42 @@ def main():
     if args.overlay:
         OVERLAY_FILE = Path(args.overlay)
     os.chdir(ROOT)
-    print("Replicator: ‚   YouTube")
+    print("Replicator: preparing a YouTube-ready video")
     print("")
     check_inputs()
     sources = collect_sources(args.video)
-    print("‹ :")
+    print("Found videos:")
     for source in sources:
         print("  " + source.name)
     print("")
 
     if any(value is not None for value in (args.heading, args.name, args.extra, args.date)):
         texts = {
-            "heading": validate_text("‚ ", args.heading, "#"),
-            "name": validate_text("‚ ", args.name, ""),
-            "extra": validate_text("‚ ‚Œ‹ ‚‚", args.extra, "‚€"),
-            "date": validate_text("‚ ‚ƒ", args.date, "‚ €€‚"),
+            "heading": validate_text("Enter the heading", args.heading, "#HEADING"),
+            "name": validate_text("Enter the name", args.name, "Name"),
+            "extra": validate_text("Enter the extra text", args.extra, "Country"),
+            "date": validate_text("Enter the date", args.date, "Event date"),
         }
     else:
         texts = {
-            "heading": prompt_text("‚ ", "#"),
-            "name": prompt_text("‚ ", ""),
-            "extra": prompt_text("‚ ‚Œ‹ ‚‚", "‚€"),
-            "date": prompt_text("‚ ‚ƒ", "‚ €€‚"),
+            "heading": prompt_text("Enter the heading", "#HEADING"),
+            "name": prompt_text("Enter the name", "Name"),
+            "extra": prompt_text("Enter the extra text", "Country"),
+            "date": prompt_text("Enter the date", "Event date"),
         }
 
     cleanup()
     print("")
-    print("€   €  ‚‚...")
+    print("Building the video with overlay and text...")
     create_medium(sources, texts)
     create_final()
     cleanup()
     print("")
-    print("! ‚‹ „:")
+    print("Done! Output file:")
     print(str(FINAL_FILE))
     print("")
     if PAUSE_ON_ERROR:
-        input("‚ Enter, ‡‚‹ €‹‚Œ ...")
+        input("Press Enter to close this window...")
 
 
 if __name__ == "__main__":
@@ -424,4 +424,4 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         print("")
-        print("‚ Œ‚.")
+        print("Stopped by user.")

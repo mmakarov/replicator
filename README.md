@@ -36,13 +36,11 @@ final file has exactly the same length as the audio.
 3. Double-click `run-windows.bat`.
 4. Choose one or more videos, one audio file, and optionally a different PNG
    overlay.
-5. Fill in the four text fields and click **‚€‚**.
+5. Fill in the four text fields and click **Start**.
 6. The result appears next to the app as `youtube_ready.mp4`.
 
 The archive already contains Python, Qt, ffmpeg, and fonts, so nothing else
 needs to be installed.
-
-> The user interface is in .
 
 ## Sample files
 
@@ -97,10 +95,10 @@ python3 gui_qt.py
 
 ```bash
 python3 replicator.py \
-  --heading "#" \
-  --name "" \
-  --extra "" \
-  --date "19.06.2026 ." \
+  --heading "#EVENT" \
+  --name "Jane Doe" \
+  --extra "United Kingdom" \
+  --date "2026-06-19" \
   --audio audio/voice.mp3 \
   --overlay overlay.png \
   --video video/source1.mp4 \

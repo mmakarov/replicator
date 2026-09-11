@@ -53,9 +53,9 @@ def main():
         details = traceback.format_exc()
         LOG_FILE.write_text(details, encoding="utf-8", errors="replace")
         show_error(
-            "€   ƒ‚‚Œ.\n\n"
-            "  ƒ‚  „ startup.log.\n"
-            "‚€Œ‚  €€‚‡ƒ."
+            "The application could not start.\n\n"
+            "A startup.log file has been created next to the launcher.\n"
+            "Please send it to the developer."
         )
         raise
 

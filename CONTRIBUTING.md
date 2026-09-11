@@ -44,10 +44,10 @@ CLI:
 
 ```bash
 python3 replicator.py \
-  --heading "#" \
-  --name "" \
-  --extra "" \
-  --date "19.06.2026 ." \
+  --heading "#EVENT" \
+  --name "Jane Doe" \
+  --extra "United Kingdom" \
+  --date "2026-06-19" \
   --audio audio/voice.mp3 \
   --overlay overlay.png \
   --video video/source1.mp4 \
@@ -80,7 +80,7 @@ python3 launcher.py --smoke
   (`Fix Cyrillic drawtext on Windows`).
 - Match the existing code style. Do not reformat unrelated code in the same
   change.
-- Keep user-facing  strings intact.
+- Keep existing user-facing wording consistent across the GUI and CLI.
 - If you can, run the optional quality gates:
 
   ```bash

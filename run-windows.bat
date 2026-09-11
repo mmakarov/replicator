@@ -19,8 +19,8 @@ exit /b 0
 
 :no_python
 echo.
-echo   Ñ python\python.exe.
-echo , ÄÖ Ä  Çåé.
+echo python\python.exe was not found.
+echo The archive may not have been extracted completely.
 if "%REPLICATOR_SMOKE%"=="1" goto no_python_exit
 pause
 :no_python_exit
@@ -29,8 +29,8 @@ exit /b 1
 
 :no_launcher
 echo.
-echo   Ñ launcher.py.
-echo , ÄÖ Ä  Çåé.
+echo launcher.py was not found.
+echo The archive may not have been extracted completely.
 if "%REPLICATOR_SMOKE%"=="1" goto no_launcher_exit
 pause
 :no_launcher_exit
@@ -39,8 +39,8 @@ exit /b 1
 
 :app_error
 echo.
-echo Ä Äàå  à.
-echo  Ä  startup.log  render.log, ÇÄåÇ çÇÇ Ñ ÄÄÇáÉ.
+echo The application exited with an error.
+echo If startup.log or render.log appeared next to the app, send that file to the developer.
 if "%REPLICATOR_SMOKE%"=="1" goto app_error_exit
 pause
 :app_error_exit

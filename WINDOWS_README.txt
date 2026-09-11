@@ -1,25 +1,28 @@
-REPLICATOR  WINDOWS 10/11
+REPLICATOR FOR WINDOWS 10/11
 
- Œ‚Œ:
+How to use:
 
-1. ƒ‚ €…  ŽƒŽ ƒ, €€  ‡ ‚.
-2. ƒ‚‚ run-windows.bat ‹ .
-3. ‚ "‹€‚Œ "  ‹€‚   Œ „.
-4. ‚ "‹€‚Œ ƒ"  ‹€‚  ƒ„.
-5. € overlay.png ƒ ‹€  ‚.  ƒ €ƒ, ‚ "‹€‚Œ €".
-6. ‚ 4 ‚‚  ‚ "‚€‚".
+1. Unzip the archive into any folder, for example your Desktop.
+2. Double-click run-windows.bat.
+3. Click "Choose video" and select one or more video files.
+4. Click "Choose audio" and select one audio file.
+5. The bundled overlay.png is already selected. To use a different one, click
+   "Choose overlay".
+6. Fill in the four text fields and click "Start".
 
-‚  ‚ €  ƒ‚:
+The finished video appears next to the launcher:
 
 youtube_ready.mp4
 
- ƒ , ‚€‚  : ‚ ƒ‚ ‚ €€ ffmpeg.
+If the audio is long, watch the log: it shows the ffmpeg progress.
 
- €€ ‹ ˆƒ, €ˆ‚ €€‚‡ƒ „‹:
+If the application reports an error, send the developer these files:
 
 startup.log
 render.log
 
- ‚ €  run-windows.bat,  ˆ ƒ‡Œ € ƒ  €.
+They appear next to run-windows.bat when the error happened during startup or
+rendering.
 
-‡ ƒ‚‚Œ  ƒ.  €… ƒ ‹ €, Python, Qt, ffmpeg  ˆ€„‚‹.
+Nothing needs to be installed. The archive already includes the application,
+Python, Qt, ffmpeg, and fonts.

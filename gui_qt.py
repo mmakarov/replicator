@@ -93,7 +93,7 @@ class ReplicatorWindow(QWidget):
 
         title = QLabel("Replicator")
         title.setObjectName("title")
-        subtitle = QLabel("‹€‚ , ƒ  €, ‚ ‚ ‚€‚")
+        subtitle = QLabel("Select video, audio and an overlay, then click Start")
         subtitle.setObjectName("subtitle")
         root.addWidget(title)
         root.addWidget(subtitle)
@@ -102,40 +102,40 @@ class ReplicatorWindow(QWidget):
         top.setSpacing(14)
         root.addLayout(top, 0)
 
-        form_group = QGroupBox("‚  ")
+        form_group = QGroupBox("Text on video")
         form_layout = QGridLayout(form_group)
         form_layout.setHorizontalSpacing(12)
         form_layout.setVerticalSpacing(10)
-        self.heading = self.make_input("#")
-        self.name = self.make_input("")
-        self.extra = self.make_input("‚€")
-        self.date = self.make_input("‚ €€‚")
+        self.heading = self.make_input("#HEADING")
+        self.name = self.make_input("Name")
+        self.extra = self.make_input("Country")
+        self.date = self.make_input("Event date")
         for row, (label, field) in enumerate(
             [
-                ("", self.heading),
-                ("", self.name),
-                ("‚Œ‹ ‚‚", self.extra),
-                ("‚", self.date),
+                ("Heading", self.heading),
+                ("Name", self.name),
+                ("Extra text", self.extra),
+                ("Date", self.date),
             ]
         ):
             form_layout.addWidget(QLabel(label), row, 0)
             form_layout.addWidget(field, row, 1)
         top.addWidget(form_group, 1)
 
-        files_group = QGroupBox("‹")
+        files_group = QGroupBox("Files")
         files_layout = QVBoxLayout(files_group)
         self.status = QLabel()
         self.status.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         self.status.setWordWrap(True)
         files_layout.addWidget(self.status, 1)
         file_buttons = QGridLayout()
-        self.choose_video_button = QPushButton("‹€‚Œ ")
+        self.choose_video_button = QPushButton("Choose video")
         self.choose_video_button.clicked.connect(self.choose_videos)
-        self.choose_audio_button = QPushButton("‹€‚Œ ƒ")
+        self.choose_audio_button = QPushButton("Choose audio")
         self.choose_audio_button.clicked.connect(self.choose_audio)
-        self.choose_overlay_button = QPushButton("‹€‚Œ €")
+        self.choose_overlay_button = QPushButton("Choose overlay")
         self.choose_overlay_button.clicked.connect(self.choose_overlay)
-        self.refresh_button = QPushButton("€‚Œ")
+        self.refresh_button = QPushButton("Reset")
         self.refresh_button.clicked.connect(self.reset_defaults)
         file_buttons.addWidget(self.choose_video_button, 0, 0)
         file_buttons.addWidget(self.choose_audio_button, 0, 1)
@@ -145,10 +145,10 @@ class ReplicatorWindow(QWidget):
         top.addWidget(files_group, 1)
 
         actions = QHBoxLayout()
-        self.start_button = QPushButton("‚€‚")
+        self.start_button = QPushButton("Start")
         self.start_button.setObjectName("startButton")
         self.start_button.clicked.connect(self.start_build)
-        self.open_button = QPushButton("‚€‹‚Œ €ƒŒ‚‚")
+        self.open_button = QPushButton("Open result")
         self.open_button.clicked.connect(self.open_result)
         actions.addWidget(self.start_button)
         actions.addWidget(self.open_button)
@@ -160,7 +160,7 @@ class ReplicatorWindow(QWidget):
         separator.setStyleSheet("color: #d8dde5;")
         root.addWidget(separator)
 
-        log_group = QGroupBox("")
+        log_group = QGroupBox("Log")
         log_layout = QVBoxLayout(log_group)
         self.log = QTextEdit()
         self.log.setObjectName("log")
@@ -176,10 +176,10 @@ class ReplicatorWindow(QWidget):
     def refresh_status(self):
         videos = [Path(path).name for path in self.video_files]
         lines = [
-            ": " + (", ".join(videos) if videos else " ‹€"),
-            "ƒ: " + (Path(self.audio_file).name if self.audio_file and Path(self.audio_file).exists() else " ‹€"),
-            "€: " + (Path(self.overlay_file).name if self.overlay_file and Path(self.overlay_file).exists() else " ‹€"),
-            "ƒŒ‚‚: " + ("youtube_ready.mp4 ‚" if (ROOT / "youtube_ready.mp4").exists() else "‰  "),
+            "Video: " + (", ".join(videos) if videos else "not selected"),
+            "Audio: " + (Path(self.audio_file).name if self.audio_file and Path(self.audio_file).exists() else "not selected"),
+            "Overlay: " + (Path(self.overlay_file).name if self.overlay_file and Path(self.overlay_file).exists() else "not selected"),
+            "Result: " + ("youtube_ready.mp4 ready" if (ROOT / "youtube_ready.mp4").exists() else "not created yet"),
         ]
         self.status.setText("\n".join(lines))
         self.open_button.setEnabled((ROOT / "youtube_ready.mp4").exists())
@@ -193,9 +193,9 @@ class ReplicatorWindow(QWidget):
     def choose_videos(self):
         files, _ = QFileDialog.getOpenFileNames(
             self,
-            "‹€‚ „‹",
+            "Select video files",
             str(ROOT),
-            " (*.mp4 *.mov *.mkv *.avi);; „‹ (*.*)",
+            "Video (*.mp4 *.mov *.mkv *.avi);;All files (*.*)",
         )
         if files:
             self.video_files = [Path(file) for file in files]
@@ -204,9 +204,9 @@ class ReplicatorWindow(QWidget):
     def choose_audio(self):
         file, _ = QFileDialog.getOpenFileName(
             self,
-            "‹€‚ ƒ„",
+            "Select an audio file",
             str(ROOT),
-            "ƒ (*.mp3 *.wav *.m4a *.aac);; „‹ (*.*)",
+            "Audio (*.mp3 *.wav *.m4a *.aac);;All files (*.*)",
         )
         if file:
             self.audio_file = Path(file)
@@ -215,9 +215,9 @@ class ReplicatorWindow(QWidget):
     def choose_overlay(self):
         file, _ = QFileDialog.getOpenFileName(
             self,
-            "‹€‚ PNG-€",
+            "Select a PNG overlay",
             str(ROOT),
-            "PNG (*.png);; „‹ (*.*)",
+            "PNG (*.png);;All files (*.*)",
         )
         if file:
             self.overlay_file = Path(file)
@@ -225,10 +225,10 @@ class ReplicatorWindow(QWidget):
 
     def values(self):
         defaults = {
-            "heading": "#",
-            "name": "",
-            "extra": "‚€",
-            "date": "‚ €€‚",
+            "heading": "#HEADING",
+            "name": "Name",
+            "extra": "Country",
+            "date": "Event date",
         }
         values = {
             "heading": self.heading.text().strip() or defaults["heading"],
@@ -238,7 +238,7 @@ class ReplicatorWindow(QWidget):
         }
         for value in values.values():
             if len(value) > MAX_TEXT_LENGTH:
-                raise ValueError("   ‹‚Œ   20 .")
+                raise ValueError("Each field must be at most 20 characters.")
         return values
 
     def append_log(self, text):
@@ -251,14 +251,14 @@ class ReplicatorWindow(QWidget):
 
     def prepare_inputs(self):
         if not self.video_files:
-            raise ValueError("‹€‚ …‚ ‹  „.")
+            raise ValueError("Select at least one video file.")
         missing_videos = [str(path) for path in self.video_files if not Path(path).exists()]
         if missing_videos:
-            raise ValueError(" ‹ ‹€‹ „‹:\n" + "\n".join(missing_videos))
+            raise ValueError("Selected video files not found:\n" + "\n".join(missing_videos))
         if not self.audio_file or not Path(self.audio_file).exists():
-            raise ValueError("‹€‚  ƒ„.")
+            raise ValueError("Select one audio file.")
         if not self.overlay_file or not Path(self.overlay_file).exists():
-            raise ValueError("‹€‚  PNG-€.")
+            raise ValueError("Select one PNG overlay.")
 
     def estimate_needed_space(self):
         selected_size = sum(Path(path).stat().st_size for path in self.video_files)
@@ -275,9 +275,9 @@ class ReplicatorWindow(QWidget):
             free_gb = usage.free / (1024 ** 3)
             need_gb = needed / (1024 ** 3)
             raise ValueError(
-                f"‚‚‡  ‚  .\n\n"
-                f": {free_gb:.1f} \n"
-                f"‚Œ ‚Œ ƒ: {need_gb:.1f} "
+                f"Not enough free disk space.\n\n"
+                f"Free: {free_gb:.1f} GB\n"
+                f"Recommended minimum: {need_gb:.1f} GB"
             )
 
     def start_build(self):
@@ -291,7 +291,7 @@ class ReplicatorWindow(QWidget):
 
         self.log.clear()
         self.render_log = RENDER_LOG.open("w", encoding="utf-8", errors="replace")
-        self.append_log("ƒ €...\n")
+        self.append_log("Starting the build...\n")
         self.start_button.setEnabled(False)
         self.open_button.setEnabled(False)
 
@@ -347,23 +347,23 @@ class ReplicatorWindow(QWidget):
         self.start_button.setEnabled(True)
         self.refresh_status()
         if code == 0 and (ROOT / "youtube_ready.mp4").exists():
-            self.append_log("\n‚. : youtube_ready.mp4\n")
+            self.append_log("\nDone. File: youtube_ready.mp4\n")
         else:
-            self.append_log(f"\nˆ €. : {code}\n")
-            QMessageBox.critical(self, "Replicator", "€ €ˆŒ  ˆ. €‚  .")
+            self.append_log(f"\nBuild failed. Exit code: {code}\n")
+            QMessageBox.critical(self, "Replicator", "The build failed. See the log for details.")
 
     def process_error(self, error):
         self.close_render_log()
         self.start_button.setEnabled(True)
         self.refresh_status()
-        message = f" ƒŒ ƒ‚‚Œ €† €: {error}"
+        message = f"Could not start the build process: {error}"
         self.append_log("\n" + message + "\n")
         QMessageBox.critical(self, "Replicator", message)
 
     def open_result(self):
         result = ROOT / "youtube_ready.mp4"
         if not result.exists():
-            QMessageBox.information(self, "Replicator", " youtube_ready.mp4 ‰  .")
+            QMessageBox.information(self, "Replicator", "youtube_ready.mp4 has not been created yet.")
             return
         try:
             if os.name == "nt":
@@ -376,7 +376,7 @@ class ReplicatorWindow(QWidget):
             try:
                 subprocess.Popen(["explorer", "/select,", str(result)])
             except Exception:
-                QMessageBox.information(self, "Replicator", f"‚‹ „ …‚ Œ:\n{result}")
+                QMessageBox.information(self, "Replicator", f"The output file is located here:\n{result}")
 
 
 def main():

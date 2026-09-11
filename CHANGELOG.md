@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Rewrote `README.md` with badges, screenshot, project structure, and
   troubleshooting.
+- Translated the entire user interface, CLI output, and documentation to
+  English.
+- Replaced the sample `overlay.png` with a neutral placeholder.
 
 ### Documentation
 
