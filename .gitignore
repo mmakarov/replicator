@@ -4,6 +4,13 @@ youtube_ready.mp4
 medium.mp4
 silent_fin.mp4
 
+# Generated runtime diagnostics.
+startup.log
+render.log
+
+# OS metadata.
+.DS_Store
+
 # Build artifacts are published as GitHub Release assets.
 dist/
 
